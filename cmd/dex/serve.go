@@ -42,6 +42,16 @@ func commandServe() *cobra.Command {
 	}
 }
 
+func corsHandler(h http.Handler) http.HandlerFunc {
+  return func(w http.ResponseWriter, r *http.Request) {
+    if (r.Method == "OPTIONS") {
+      //handle preflight in here
+    } else {
+      h.ServeHTTP(w,r)
+    }
+  }
+}
+
 func serve(cmd *cobra.Command, args []string) error {
 	switch len(args) {
 	default:
@@ -258,7 +268,9 @@ func serve(cmd *cobra.Command, args []string) error {
 
 	telemetryServ := http.NewServeMux()
 	telemetryServ.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
-
+	
+	serv.Handle("/", corsHandler(restHandler))
+	
 	errc := make(chan error, 3)
 	if c.Telemetry.HTTP != "" {
 		logger.Infof("listening (http/telemetry) on %s", c.Telemetry.HTTP)
