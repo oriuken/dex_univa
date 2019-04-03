@@ -253,37 +253,13 @@ func serve(cmd *cobra.Command, args []string) error {
 		serverConfig.AuthRequestsValidFor = authRequests
 	}
 
-	serv, err := server.NewServer(context.Background(), serverConfig)
+	serv, err := server.NewServerMux(context.Background(), serverConfig)
 	if err != nil {
 		return fmt.Errorf("failed to initialize server: %v", err)
 	}
 
 	telemetryServ := http.NewServeMux()
 	telemetryServ.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
-
-	
-	// CORS
-	handleWithCORS := func(p string, h http.HandlerFunc) {
-		var handler http.Handler = h
-
-		corsOptions := handlers.IgnoreOptions()
-		corsSettings := handlers.AllowedOrigins([]string{"*"})
-		handler = handlers.CORS(corsSettings, corsOptions)(handler)
-
-		serv.Handle(path.Join(Issuer.Path, p), handler)
-	}
-	
-	discoveryHandler, err := serv.discoveryHandler()
-	if err != nil {
-		return nil, err
-	}
-	
-	handleWithCORS("/.well-known/openid-configuration", discoveryHandler)
-	handleWithCORS("/token", serv.handleToken)
-	handleWithCORS("/keys", serv.handlePublicKeys)
-	
-	// CORS
-	
 	
 	errc := make(chan error, 3)
 	if c.Telemetry.HTTP != "" {
