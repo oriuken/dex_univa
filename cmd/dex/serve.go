@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"path"
 	"net"
 	"net/http"
 	"os"
@@ -19,7 +18,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
-	"github.com/gorilla/handlers"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -253,14 +251,14 @@ func serve(cmd *cobra.Command, args []string) error {
 		serverConfig.AuthRequestsValidFor = authRequests
 	}
 
-	serv, err := server.NewServerMux(context.Background(), serverConfig)
+	serv, err := server.NewServer(context.Background(), serverConfig)
 	if err != nil {
 		return fmt.Errorf("failed to initialize server: %v", err)
 	}
 
 	telemetryServ := http.NewServeMux()
 	telemetryServ.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
-	
+
 	errc := make(chan error, 3)
 	if c.Telemetry.HTTP != "" {
 		logger.Infof("listening (http/telemetry) on %s", c.Telemetry.HTTP)
