@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"path"
 	"net"
 	"net/http"
 	"os"
@@ -18,6 +19,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
+	"github.com/gorilla/handlers"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -259,6 +261,30 @@ func serve(cmd *cobra.Command, args []string) error {
 	telemetryServ := http.NewServeMux()
 	telemetryServ.Handle("/metrics", promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{}))
 
+	
+	// CORS
+	handleWithCORS := func(p string, h http.HandlerFunc) {
+		var handler http.Handler = h
+
+		corsOptions := handlers.IgnoreOptions()
+		corsSettings := handlers.AllowedOrigins([]string{"*"})
+		handler = handlers.CORS(corsSettings, corsOptions)(handler)
+
+		serv.Handle(path.Join(Issuer.Path, p), handler)
+	}
+	
+	discoveryHandler, err := serv.discoveryHandler()
+	if err != nil {
+		return nil, err
+	}
+	
+	handleWithCORS("/.well-known/openid-configuration", discoveryHandler)
+	handleWithCORS("/token", serv.handleToken)
+	handleWithCORS("/keys", serv.handlePublicKeys)
+	
+	// CORS
+	
+	
 	errc := make(chan error, 3)
 	if c.Telemetry.HTTP != "" {
 		logger.Infof("listening (http/telemetry) on %s", c.Telemetry.HTTP)
