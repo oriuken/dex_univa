@@ -39,8 +39,8 @@ telemetry:
 #   idTokens: "24h"
 
 # Options for controlling the logger.
-# logger:
-#   level: "debug"
+logger:
+  level: "debug"
 #   format: "text" # can also be "json"
 
 # Uncomment this block to control which response types dex supports. For example
