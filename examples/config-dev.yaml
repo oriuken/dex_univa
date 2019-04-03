@@ -15,6 +15,7 @@ storage:
 # Configuration for the HTTP endpoints.
 web:
   http: 0.0.0.0:5556
+  allowedOrigins: ['*']
   # Uncomment for HTTPS options.
   # https: 127.0.0.1:5554
   # tlsCert: /etc/dex/tls.crt
@@ -52,10 +53,10 @@ telemetry:
 #
 # If this option isn't chosen clients may be added through the gRPC API.
 staticClients:
-- id: example-app
+- id: launch2
   redirectURIs:
   - 'http://127.0.0.1:3000/callback'
-  name: 'Example App'
+  name: 'Navops Launch 2.0'
   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
 
 connectors:
