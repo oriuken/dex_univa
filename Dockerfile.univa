@@ -169,6 +169,4 @@ EXPOSE 15556
 
 STOPSIGNAL SIGTERM
 
-CMD ["nginx", "-g", "daemon off;"]
-
-CMD ["/bin/sh", "/init.sh"]
+CMD ["/bin/sh", "/init.sh", "nginx", "-g", "daemon off;"]
