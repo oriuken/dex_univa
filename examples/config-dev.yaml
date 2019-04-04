@@ -48,7 +48,8 @@ logger:
 # Defaults to ["code"], the code flow.
 # oauth2:
 #   responseTypes: ["code", "token", "id_token"]
-
+oauth2:
+   skipApprovalScreen: true
 # Instead of reading from an external storage, use this list of clients.
 #
 # If this option isn't chosen clients may be added through the gRPC API.
@@ -60,9 +61,9 @@ staticClients:
   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
 
 connectors:
-- type: mockCallback
-  id: mock
-  name: Example
+# - type: mockCallback
+#  id: mock
+#  name: Example
 # - type: oidc
 #   id: google
 #   name: Google
